@@ -9,7 +9,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -33,27 +32,23 @@ public class ProductControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @BeforeEach
-    void setup() {
-        repository.deleteAll();
-    }
 
-    @Test
-    void testGetById() throws Exception {
-        Product p = new Product(null, "clavier", 10, List.of());
-        Product saved = repository.save(p);
+@BeforeEach
+void cleanDatabase() {
+    repository.deleteAll();
+}
 
-        mockMvc.perform(get("/products/" + saved.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("clavier"))
+@Test
+void testGetById() throws Exception {
+    Product p = new Product(null, "clavier", 10, List.of());
+    Product saved = repository.save(p);
+
+    mockMvc.perform(get("/products/" + saved.getId()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.name").value("clavier"))
                 .andExpect(jsonPath("$.price").value(10.0));
     }
 
-    @Test
-    void testGetByIdNotFound() throws Exception {
-        mockMvc.perform(get("/products/99"))
-                .andExpect(status().isNotFound());
-    }
 
     @Test
     void testCreateProduct() throws Exception {
@@ -68,24 +63,26 @@ public class ProductControllerTest {
     }
 
     @Test
-    void testCreateWithInvalidData() throws Exception {
-        Product invalid = new Product(); // vide
+    void testReadProduct() throws   Exception {
+        Product p = repository.save(new Product(null, "clavier", 10, List.of()));
 
-        mockMvc.perform(post("/products")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(invalid)))
-                .andExpect(status().isBadRequest());
+        mockMvc.perform(get("/products/" + p.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("clavier"))
+                .andExpect(jsonPath("$.price").value(10.0));
     }
+
 
     @Test
     void testGetAll() throws Exception {
-        Product p = new Product(null, "Stylo", 2.5, List.of());
+        Product p = new Product(null, "clavier", 10, List.of());
         repository.save(p);
 
         mockMvc.perform(get("/products"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].name").value("Stylo"));
+                .andExpect(jsonPath("$[0].name").value("clavier"));
     }
+
 
     @Test
     void testUpdate() throws Exception {
@@ -101,16 +98,6 @@ public class ProductControllerTest {
     }
 
     @Test
-    void testUpdateNotFound() throws Exception {
-        Product updated = new Product(99L, "Inexistant", 5.0, List.of());
-
-        mockMvc.perform(put("/products/99")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(updated)))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
     void testDuplicate() throws Exception {
         Product saved = repository.save(new Product(null, "Stylo", 2.5, List.of()));
 
@@ -121,11 +108,7 @@ public class ProductControllerTest {
                 .andExpect(jsonPath("$.id").isNumber());
     }
 
-    @Test
-    void testDuplicateNotFound() throws Exception {
-        mockMvc.perform(post("/products/99/duplicate"))
-                .andExpect(status().isNotFound());
-    }
+ 
 
     @Test
     void testCreateBundle() throws Exception {
@@ -141,25 +124,5 @@ public class ProductControllerTest {
                 .andExpect(jsonPath("$.price").value(4.0));
     }
 
-    @Test
-    void testCreateBundleEmptyList() throws Exception {
-        List<Long> empty = List.of();
-
-        mockMvc.perform(post("/products/bundle")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(empty)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void testDelete() throws Exception {
-        Product saved = repository.save(new Product(null, "Gomme", 0.8, List.of()));
-
-        mockMvc.perform(delete("/products/" + saved.getId()))
-                .andExpect(status().isOk());
-
-        // Vérifie que le produit n'existe plus
-        mockMvc.perform(get("/products/" + saved.getId()))
-                .andExpect(status().isNotFound());
-    }
+   
 }

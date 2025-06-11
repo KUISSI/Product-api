@@ -72,53 +72,42 @@ Route : `POST /products/bundle`
 L'application démarre sur : http://localhost:8080
 
 🧪 Tests
-Les tests sont réalisés avec JUnit 5 et MockMvc, et couvrent l’ensemble des fonctionnalités exposées par l’API REST. Chaque test est exécuté dans une base H2 en mémoire.
+Cette API REST est testée à l'aide de tests d'intégration avec Spring Boot (@SpringBootTest) et MockMvc (@AutoConfigureMockMvc).
 
-🔍 Tests de lecture (GET)
-✅ GET /products/{id} : retourne un produit existant
+Le fichier ProductControllerTest.java couvre les cas suivants :
 
-❌ GET /products/{id} : retourne 404 Not Found si l’ID n’existe pas
+🔍 Récupération d’un produit par ID
 
-✅ GET /products : retourne la liste de tous les produits
+Vérifie que l'endpoint GET /products/{id} retourne bien les informations du produit.
 
-➕ Tests de création (POST)
-✅ POST /products : crée un produit avec un nom et un prix valides
+➕ Création d’un produit
 
-❌ POST /products : retourne 400 Bad Request pour une requête invalide (ex. : produit vide)
+Vérifie que l'endpoint POST /products crée un produit avec les bons champs (name, price) et un id généré.
 
-♻️ Tests de mise à jour (PUT)
-✅ PUT /products/{id} : met à jour un produit existant
+📚 Récupération de tous les produits
 
-❌ PUT /products/{id} : retourne 404 Not Found si le produit n’existe pas
+Vérifie que l'endpoint GET /products retourne la liste des produits enregistrés.
 
-🗑️ Tests de suppression (DELETE)
-✅ DELETE /products/{id} : supprime un produit existant
+✏️ Mise à jour d’un produit
 
-❌ Lecture après suppression : retourne 404 Not Found si on tente d’accéder à un produit supprimé
+Vérifie que l'endpoint PUT /products/{id} met bien à jour un produit existant.
 
-🔁 Tests de duplication
-✅ POST /products/{id}/duplicate : crée une copie d’un produit avec un nouvel ID
+📎 Duplication d’un produit
 
-❌ POST /products/{id}/duplicate : retourne 404 Not Found si l’ID source n’existe pas
+Vérifie que l'endpoint POST /products/{id}/duplicate crée une copie conforme du produit avec un nouvel id.
 
-📦 Tests de bundle
-✅ POST /products/bundle : crée un bundle à partir d’une liste de produits (somme des prix, concaténation des noms)
+🎁 Création d’un bundle de produits
 
-❌ POST /products/bundle : retourne 400 Bad Request si la liste est vide
+Vérifie que l'endpoint POST /products/bundle crée un nouveau produit représentant un bundle avec le nom combiné et la somme des prix des produits inclus.
 
-📦 Pour lancer tous les tests :
+Tous les tests utilisent une base de données en mémoire (H2) réinitialisée avant chaque test avec repository.deleteAll() pour garantir l'isolation.
+
+Exécution des tests (si Maven est utilisé) :
 
 bash
 Copier
 Modifier
-./mvnw test
-Ils sont tous localisés dans le fichier :
-
-swift
-Copier
-Modifier
-src/test/java/com/example/product_api/controller/ProductControllerTest.java
-
+mvn test
 ```
 
 👨‍💻 Auteur

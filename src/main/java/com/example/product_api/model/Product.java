@@ -9,6 +9,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
 
 
 @Entity
@@ -16,12 +18,19 @@ public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String name;
-    private double price;
+  
     
     @ManyToMany(fetch = FetchType.EAGER)
     private List<Product> sources = new ArrayList<>();
     
+
+@NotBlank
+private String name;
+
+@Positive
+private Double price;
+
+
     // Basic getters and setters
     public Long getId() {
         return id;

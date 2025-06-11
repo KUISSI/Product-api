@@ -72,44 +72,53 @@ Route : `POST /products/bundle`
 L'application démarre sur : http://localhost:8080
 
 🧪 Tests
+Les tests sont réalisés avec JUnit 5 et MockMvc, et couvrent l’ensemble des fonctionnalités exposées par l’API REST. Chaque test est exécuté dans une base H2 en mémoire.
+
+🔍 Tests de lecture (GET)
+✅ GET /products/{id} : retourne un produit existant
+
+❌ GET /products/{id} : retourne 404 Not Found si l’ID n’existe pas
+
+✅ GET /products : retourne la liste de tous les produits
+
+➕ Tests de création (POST)
+✅ POST /products : crée un produit avec un nom et un prix valides
+
+❌ POST /products : retourne 400 Bad Request pour une requête invalide (ex. : produit vide)
+
+♻️ Tests de mise à jour (PUT)
+✅ PUT /products/{id} : met à jour un produit existant
+
+❌ PUT /products/{id} : retourne 404 Not Found si le produit n’existe pas
+
+🗑️ Tests de suppression (DELETE)
+✅ DELETE /products/{id} : supprime un produit existant
+
+❌ Lecture après suppression : retourne 404 Not Found si on tente d’accéder à un produit supprimé
+
+🔁 Tests de duplication
+✅ POST /products/{id}/duplicate : crée une copie d’un produit avec un nouvel ID
+
+❌ POST /products/{id}/duplicate : retourne 404 Not Found si l’ID source n’existe pas
+
+📦 Tests de bundle
+✅ POST /products/bundle : crée un bundle à partir d’une liste de produits (somme des prix, concaténation des noms)
+
+❌ POST /products/bundle : retourne 400 Bad Request si la liste est vide
+
+📦 Pour lancer tous les tests :
+
 bash
 Copier
 Modifier
 ./mvnw test
-📂 Console H2
-Interface web pour consulter la base de données en mémoire
+Ils sont tous localisés dans le fichier :
 
-Accès : http://localhost:8080/h2-console
-
-JDBC URL : jdbc:h2:mem:testdb
-
-Utilisateur : sa — Mot de passe vide
-
-🧪 Requêtes cURL utiles
-➕ Créer un produit
-bash
+swift
 Copier
 Modifier
-curl -X POST http://localhost:8080/products \
--H "Content-Type: application/json" \
--d '{"name":"Clavier","price":49.99}'
-📄 Lister tous les produits
-bash
-Copier
-Modifier
-curl http://localhost:8080/products
-📦 Créer un bundle
-bash
-Copier
-Modifier
-curl -X POST http://localhost:8080/products/bundle \
--H "Content-Type: application/json" \
--d '[1,2,3]'
-🔁 Dupliquer un produit
-bash
-Copier
-Modifier
-curl -X POST http://localhost:8080/products/1/duplicate
+src/test/java/com/example/product_api/controller/ProductControllerTest.java
+
 ```
 
 👨‍💻 Auteur

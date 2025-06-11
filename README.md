@@ -12,7 +12,7 @@ Ce projet est une **API REST CRUD** développée en **Java avec Spring Boot**. I
 product-api/
 ├── src/
 │ ├── main/
-│ │ ├── java/com/example/productapi/
+│ │ ├── java/com/example/product_api/
 │ │ │ ├── ProductApiApplication.java # Classe principale
 │ │ │ ├── controller/ProductController.java # Contrôleur REST
 │ │ │ ├── model/Product.java # Entité JPA
@@ -72,44 +72,42 @@ Route : `POST /products/bundle`
 L'application démarre sur : http://localhost:8080
 
 🧪 Tests
-bash
-Copier
-Modifier
-./mvnw test
-📂 Console H2
-Interface web pour consulter la base de données en mémoire
+Cette API REST est testée à l'aide de tests d'intégration avec Spring Boot (@SpringBootTest) et MockMvc (@AutoConfigureMockMvc).
 
-Accès : http://localhost:8080/h2-console
+Le fichier ProductControllerTest.java couvre les cas suivants :
 
-JDBC URL : jdbc:h2:mem:testdb
+🔍 Récupération d’un produit par ID
 
-Utilisateur : sa — Mot de passe vide
+Vérifie que l'endpoint GET /products/{id} retourne bien les informations du produit.
 
-🧪 Requêtes cURL utiles
-➕ Créer un produit
+➕ Création d’un produit
+
+Vérifie que l'endpoint POST /products crée un produit avec les bons champs (name, price) et un id généré.
+
+📚 Récupération de tous les produits
+
+Vérifie que l'endpoint GET /products retourne la liste des produits enregistrés.
+
+✏️ Mise à jour d’un produit
+
+Vérifie que l'endpoint PUT /products/{id} met bien à jour un produit existant.
+
+📎 Duplication d’un produit
+
+Vérifie que l'endpoint POST /products/{id}/duplicate crée une copie conforme du produit avec un nouvel id.
+
+🎁 Création d’un bundle de produits
+
+Vérifie que l'endpoint POST /products/bundle crée un nouveau produit représentant un bundle avec le nom combiné et la somme des prix des produits inclus.
+
+Tous les tests utilisent une base de données en mémoire (H2) réinitialisée avant chaque test avec repository.deleteAll() pour garantir l'isolation.
+
+Exécution des tests (si Maven est utilisé) :
+
 bash
 Copier
 Modifier
-curl -X POST http://localhost:8080/products \
--H "Content-Type: application/json" \
--d '{"name":"Clavier","price":49.99}'
-📄 Lister tous les produits
-bash
-Copier
-Modifier
-curl http://localhost:8080/products
-📦 Créer un bundle
-bash
-Copier
-Modifier
-curl -X POST http://localhost:8080/products/bundle \
--H "Content-Type: application/json" \
--d '[1,2,3]'
-🔁 Dupliquer un produit
-bash
-Copier
-Modifier
-curl -X POST http://localhost:8080/products/1/duplicate
+mvn test
 ```
 
 👨‍💻 Auteur

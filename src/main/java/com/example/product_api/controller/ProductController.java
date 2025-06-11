@@ -2,20 +2,17 @@ package com.example.product_api.controller;
 
 import java.util.List;
 
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.product_api.model.Product;
 import com.example.product_api.repository.ProductRepository;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/products")
+@Validated
 public class ProductController {
 
     private final ProductRepository repository;
@@ -35,7 +32,7 @@ public class ProductController {
     }
 
     @PostMapping
-    public Product create(@RequestBody Product product) {
+    public Product create(@Valid @RequestBody Product product) {
         return repository.save(product);
     }
 
@@ -53,46 +50,46 @@ public class ProductController {
     }
 
     @PostMapping("/{id}/duplicate")
-public Product duplicate(@PathVariable Long id) {
-    Product original = repository.findById(id).orElseThrow();
-    
-    Product clone = new Product();
-    clone.setName(original.getName());
-    clone.setPrice(original.getPrice());
-    
-    return repository.save(clone);
-}
+    public Product duplicate(@PathVariable Long id) {
+        Product original = repository.findById(id).orElseThrow();
 
-@PostMapping("/bundle")
-public Product createBundle(@RequestBody List<Long> sourceIds) {
-    List<Product> sources = repository.findAllById(sourceIds);
+        Product clone = new Product();
+        clone.setName(original.getName());
+        clone.setPrice(original.getPrice());
 
-    // Vérification récursive simple (aucun des sources ne doit contenir le bundle lui-même)
-    for (Product source : sources) {
-        if (hasCycle(source, sourceIds)) {
-            throw new IllegalArgumentException("Boucle détectée !");
-        }
+        return repository.save(clone);
     }
 
-    Product bundle = new Product();
-    bundle.setName("Bundle: " + 
-        sources.stream().map(Product::getName).reduce((a, b) -> a + " + " + b).orElse(""));
-
-    double totalPrice = sources.stream().mapToDouble(Product::getPrice).sum();
-    bundle.setPrice(totalPrice);
-    bundle.setSources(sources);
-
-    return repository.save(bundle);
-}
-
-private boolean hasCycle(Product product, List<Long> newSourceIds) {
-    for (Product source : product.getSources()) {
-        if (newSourceIds.contains(source.getId()) || hasCycle(source, newSourceIds)) {
-            return true;
+    @PostMapping("/bundle")
+    public Product createBundle(@RequestBody List<Long> sourceIds) {
+        if (sourceIds == null || sourceIds.isEmpty()) {
+            throw new IllegalArgumentException("La liste des produits source est vide.");
         }
+
+        List<Product> sources = repository.findAllById(sourceIds);
+
+        for (Product source : sources) {
+            if (hasCycle(source, sourceIds)) {
+                throw new IllegalArgumentException("Boucle détectée !");
+            }
+        }
+
+        Product bundle = new Product();
+        bundle.setName("Bundle: " +
+                sources.stream().map(Product::getName).reduce((a, b) -> a + " + " + b).orElse(""));
+        bundle.setPrice(sources.stream().mapToDouble(Product::getPrice).sum());
+        bundle.setSources(sources);
+
+        return repository.save(bundle);
     }
-    return false;
-}
 
-
+    private boolean hasCycle(Product product, List<Long> newSourceIds) {
+        if (product.getSources() == null) return false;
+        for (Product source : product.getSources()) {
+            if (newSourceIds.contains(source.getId()) || hasCycle(source, newSourceIds)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

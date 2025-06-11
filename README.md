@@ -12,7 +12,7 @@ Ce projet est une **API REST CRUD** développée en **Java avec Spring Boot**. I
 product-api/
 ├── src/
 │ ├── main/
-│ │ ├── java/com/example/productapi/
+│ │ ├── java/com/example/product_api/
 │ │ │ ├── ProductApiApplication.java # Classe principale
 │ │ │ ├── controller/ProductController.java # Contrôleur REST
 │ │ │ ├── model/Product.java # Entité JPA
